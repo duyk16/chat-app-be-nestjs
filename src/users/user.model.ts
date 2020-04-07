@@ -1,7 +1,7 @@
-import { prop } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
+import { prop, arrayProp, Ref } from '@typegoose/typegoose';
 
 import { BaseModel } from '../shared/base.model';
+import { Conversation } from '../conversations/conversation.model';
 
 export class User extends BaseModel {
   @prop()
@@ -16,9 +16,9 @@ export class User extends BaseModel {
   @prop()
   refreshToken?: string;
 
-  @prop({ default: [] })
-  conversations!: Types.ObjectId[];
+  @arrayProp({ default: [], itemsRef: Conversation })
+  conversations!: Ref<Conversation>[];
 
-  @prop({ default: 0 })
-  newMessageCount!: number;
+  @arrayProp({ default: [], itemsRef: Conversation })
+  newMessageConversations!: Ref<Conversation>[];
 }

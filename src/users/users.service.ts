@@ -32,7 +32,7 @@ export class UsersService extends BaseService<User> {
       { email },
       {
         conversations: 1,
-        newMessageCount: 1,
+        newMessageConversations: 1,
         email: 1,
         displayName: 1,
         updatedAt: 1,

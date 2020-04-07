@@ -21,7 +21,8 @@ export class BaseService<T extends BaseModel> {
     this.logger = new Logger(model.modelName + 'Service');
   }
 
-  toObjectId(id: string) {
+  toObjectId(id: string | Types.ObjectId) {
+    if (typeof id !== 'string') return id;
     try {
       return Types.ObjectId(id);
     } catch (error) {
@@ -60,7 +61,7 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async getById(id: string, projection = {}) {
+  public async getById(id: string | Types.ObjectId, projection = {}) {
     try {
       const found = await this.model.findById(this.toObjectId(id), projection);
       if (!found) {

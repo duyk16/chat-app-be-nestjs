@@ -51,7 +51,7 @@ export class AuthService {
       throw new UnauthorizedException(`Password is not valid`);
     }
 
-    const payload = { email: user.email };
+    const payload = { _id: user._id, email: user.email };
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: '1d',
     });
@@ -74,10 +74,9 @@ export class AuthService {
         refreshToken,
       )) as Payload;
 
-      const user = await this.usersService.findOne(
-        { email: payload.email },
-        { refreshToken: 1 },
-      );
+      const user = await this.usersService.getById(payload._id, {
+        refreshToken: 1,
+      });
 
       if (!user) {
         this.logger.log(`Not found user to validate refresh token`);
@@ -85,7 +84,7 @@ export class AuthService {
       }
 
       const accessToken = await this.jwtService.signAsync(
-        { email: payload.email },
+        { _id: user._id, email: payload.email },
         { expiresIn: '1d' },
       );
 
