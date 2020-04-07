@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useFindAndModify: false,
     }),
     UsersModule,
     AuthModule,

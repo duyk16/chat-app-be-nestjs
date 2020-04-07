@@ -7,11 +7,14 @@ export class User extends BaseModel {
   @prop()
   displayName!: string;
 
-  @prop()
+  @prop({ unique: true })
   email!: string;
 
   @prop({ index: true })
   password!: string;
+
+  @prop()
+  refreshToken?: string;
 
   @prop({ default: [] })
   conversations!: Types.ObjectId[];

@@ -32,39 +32,39 @@ describe('UsersController', () => {
     expect(controller).toBeDefined();
   });
 
-  const createUserDto: CreateUserDto = {
-    email: 'tester01@gmail.com',
-    password: '123456',
-    displayName: 'Tester 01',
-  };
+  // const createUserDto: CreateUserDto = {
+  //   email: 'tester01@gmail.com',
+  //   password: '123456',
+  //   displayName: 'Tester 01',
+  // };
 
-  it('Create user success', async () => {
-    const mock = { _id: 'testId', createdAt: new Date() };
-    jest.spyOn(service, 'createUser').mockResolvedValue(mock);
+  // it('Create user success', async () => {
+  //   const mock = { _id: 'testId', createdAt: new Date() };
+  //   jest.spyOn(service, 'createUser').mockResolvedValue(mock);
 
-    expect(service.createUser).not.toHaveBeenCalled();
-    const result = await controller.createUser(createUserDto);
+  //   expect(service.createUser).not.toHaveBeenCalled();
+  //   const result = await controller.createUser(createUserDto);
 
-    expect(result).toBeDefined();
-    expect(result._id).toEqual(mock._id);
-    expect(result.createdAt).toEqual(mock.createdAt);
-    expect(service.createUser).toBeCalled();
+  //   expect(result).toBeDefined();
+  //   expect(result._id).toEqual(mock._id);
+  //   expect(result.createdAt).toEqual(mock.createdAt);
+  //   expect(service.createUser).toBeCalled();
 
-    jest.spyOn(service, 'createUser').mockClear();
-  });
+  //   jest.spyOn(service, 'createUser').mockClear();
+  // });
 
-  it('Create user error', async () => {
-    try {
-      jest
-        .spyOn(service, 'createUser')
-        .mockRejectedValue(new InternalServerErrorException());
+  // it('Create user error', async () => {
+  //   try {
+  //     jest
+  //       .spyOn(service, 'createUser')
+  //       .mockRejectedValue(new InternalServerErrorException());
 
-      expect(service.createUser).not.toHaveBeenCalled();
-      await controller.createUser(createUserDto);
-    } catch (error) {
-      expect(error).toBeDefined();
-      expect(error instanceof InternalServerErrorException).toBeTruthy();
-      jest.spyOn(service, 'createUser').mockClear();
-    }
-  });
+  //     expect(service.createUser).not.toHaveBeenCalled();
+  //     await controller.createUser(createUserDto);
+  //   } catch (error) {
+  //     expect(error).toBeDefined();
+  //     expect(error instanceof InternalServerErrorException).toBeTruthy();
+  //     jest.spyOn(service, 'createUser').mockClear();
+  //   }
+  // });
 });
