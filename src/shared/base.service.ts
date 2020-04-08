@@ -11,6 +11,9 @@ import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
 import { MongoError } from 'mongodb';
 
 import { BaseModel } from './base.model';
+import { TPagination } from './general.interface';
+
+type TProjection<T> = { [key in keyof T]?: number };
 
 export class BaseService<T extends BaseModel> {
   protected logger: Logger;
@@ -24,7 +27,7 @@ export class BaseService<T extends BaseModel> {
   toObjectId(id: string | Types.ObjectId) {
     if (typeof id !== 'string') return id;
     try {
-      return Types.ObjectId(id);
+      return new Types.ObjectId(id);
     } catch (error) {
       throw new BadRequestException(`ID is not valid`);
     }
@@ -61,7 +64,34 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async getById(id: string | Types.ObjectId, projection = {}) {
+  public async getAllWithPagination(
+    filter = {},
+    pagination: TPagination = {},
+    projection: TProjection<T>,
+  ) {
+    try {
+      let { page = 0, limit = 10 } = pagination;
+      const [count, docs] = await Promise.all([
+        this.model.find(filter).count(),
+        this.model
+          .find(filter, projection)
+          .skip(page * limit)
+          .limit(limit),
+      ]);
+
+      return {
+        data: docs,
+        page: page,
+        limit: limit,
+        endPage: Math.floor(count / limit),
+      };
+    } catch (error) {}
+  }
+
+  public async getById(
+    id: string | Types.ObjectId,
+    projection: TProjection<T> = {},
+  ) {
     try {
       const found = await this.model.findById(this.toObjectId(id), projection);
       if (!found) {
@@ -74,10 +104,7 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async findOne(
-    filter = {},
-    projection: { [key in keyof T]?: number } = {},
-  ) {
+  public async findOne(filter = {}, projection: TProjection<T> = {}) {
     try {
       const found = await this.model.findOne(filter, projection);
       if (!found) {
@@ -85,9 +112,7 @@ export class BaseService<T extends BaseModel> {
           `Failed to find one. Filter: ${JSON.stringify(filter)}`,
         );
 
-        throw new NotFoundException(
-          `Not found with Filter: ${JSON.stringify(filter)}`,
-        );
+        throw new NotFoundException(`Not found`);
       }
 
       return found;
@@ -107,7 +132,7 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async updateById(id: string, update: any) {
+  public async updateById(id: string | Types.ObjectId, update: any) {
     try {
       return await this.model.findByIdAndUpdate(this.toObjectId(id), update);
     } catch (error) {
@@ -120,9 +145,32 @@ export class BaseService<T extends BaseModel> {
 
   public async deleteById(id: string) {
     try {
-      return await this.model.findByIdAndRemove(id);
+      let found = await this.model.findByIdAndRemove(id);
+      if (!found) {
+        this.logger.log(`Failed to delete by Id. Id: ${JSON.stringify(id)}`);
+
+        throw new NotFoundException(`Not found`);
+      }
+      return found;
     } catch (error) {
-      this.logger.log(`Fail to delete user by Id. Data: ${JSON.stringify(id)}`);
+      this.logger.log(`Fail to delete by Id. Data: ${JSON.stringify(id)}`);
+      this.handleMongoException(error);
+    }
+  }
+
+  public async deleteOne(filter = {}) {
+    try {
+      let found = await this.model.findOneAndDelete(filter);
+      if (!found) {
+        this.logger.log(
+          `Failed to delete one. Filter: ${JSON.stringify(filter)}`,
+        );
+
+        throw new NotFoundException(`Not found`);
+      }
+      return found;
+    } catch (error) {
+      this.logger.log(`Fail to delete. Filter: ${JSON.stringify(filter)}`);
       this.handleMongoException(error);
     }
   }

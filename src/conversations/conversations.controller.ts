@@ -5,7 +5,8 @@ import {
   Body,
   ValidationPipe,
   Get,
-  Query,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -28,5 +29,15 @@ export class ConversationsController {
       user._id,
       createConversationDto,
     );
+  }
+
+  @Get('/')
+  getConversations(@GetUser() user: Payload) {
+    return this.conversationsService.getUserConversations(user._id);
+  }
+
+  @Delete('/:id')
+  deleteConversation(@GetUser() user: Payload, @Param('id') id: string) {
+    return this.conversationsService.deleteConversation(id, user._id);
   }
 }
