@@ -5,10 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConversationsModule } from './conversations/conversations.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URL, {
       useCreateIndex: true,
       useNewUrlParser: true,
@@ -18,6 +19,7 @@ import { ConversationsModule } from './conversations/conversations.module';
     UsersModule,
     AuthModule,
     ConversationsModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

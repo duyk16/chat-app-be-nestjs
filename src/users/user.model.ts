@@ -16,9 +16,9 @@ export class User extends BaseModel {
   @prop()
   refreshToken?: string;
 
-  @arrayProp({ default: [], itemsRef: Conversation })
+  @arrayProp({ default: [], itemsRef: 'Conversation' })
   conversations!: Ref<Conversation>[];
 
-  @arrayProp({ default: [], itemsRef: Conversation })
+  @arrayProp({ default: [], itemsRef: 'Conversation' })
   newMessageConversations!: Ref<Conversation>[];
 }

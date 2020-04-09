@@ -53,11 +53,11 @@ export class AuthService {
 
     const payload = { _id: user._id, email: user.email };
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || '1d',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '7d',
+      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE || '7d',
     });
 
     await this.usersService.updateById(user._id, { refreshToken });
@@ -85,7 +85,7 @@ export class AuthService {
 
       const accessToken = await this.jwtService.signAsync(
         { _id: user._id, email: payload.email },
-        { expiresIn: '1d' },
+        { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || '1d' },
       );
 
       return { accessToken };

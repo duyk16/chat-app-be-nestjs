@@ -10,7 +10,13 @@ import { PassportModule } from '@nestjs/passport';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({ secret: 'CHAT_APP' }),
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          secret: process.env.JWT_SECRET || '123456',
+        };
+      },
+    }),
     forwardRef(() => UsersModule),
   ],
   controllers: [AuthController],
