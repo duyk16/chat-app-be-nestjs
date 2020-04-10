@@ -7,7 +7,6 @@ import {
   Get,
   Delete,
   Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,7 +16,6 @@ import { GetUser } from '../auth/getUser.decorator';
 import { Payload } from '../auth/jwt.interface';
 import { CreateConversationDto } from './conversation.dto';
 import { PaginationDto, PaginationPipe } from '../shared/general.interface';
-import { plainToClass } from 'class-transformer';
 
 @Controller('conversations')
 @UseGuards(AuthGuard())
