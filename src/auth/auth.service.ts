@@ -74,7 +74,7 @@ export class AuthService {
         refreshToken,
       )) as Payload;
 
-      const user = await this.usersService.getById(payload._id, {
+      const user = await this.usersService.findById(payload._id, {
         refreshToken: 1,
       });
 

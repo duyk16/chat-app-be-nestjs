@@ -7,6 +7,8 @@ import {
   Get,
   Delete,
   Param,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -14,6 +16,8 @@ import { ConversationsService } from './conversations.service';
 import { GetUser } from '../auth/getUser.decorator';
 import { Payload } from '../auth/jwt.interface';
 import { CreateConversationDto } from './conversation.dto';
+import { PaginationDto, PaginationPipe } from '../shared/general.interface';
+import { plainToClass } from 'class-transformer';
 
 @Controller('conversations')
 @UseGuards(AuthGuard())
@@ -34,6 +38,19 @@ export class ConversationsController {
   @Get('/')
   getConversations(@GetUser() user: Payload) {
     return this.conversationsService.getUserConversations(user._id);
+  }
+
+  @Get('/:id/messages')
+  getConversationMessage(
+    @GetUser() user: Payload,
+    @Param('id') id: string,
+    @Query(PaginationPipe) paginationDto: PaginationDto,
+  ) {
+    return this.conversationsService.getConversationMessages(
+      user._id,
+      id,
+      paginationDto,
+    );
   }
 
   @Delete('/:id')

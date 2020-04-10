@@ -3,8 +3,6 @@ import {
   NotFoundException,
   Inject,
   ConflictException,
-  Type,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ReturnModelType, DocumentType } from '@typegoose/typegoose';
@@ -15,6 +13,8 @@ import { CreateConversationDto } from './conversation.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.model';
 import { Types } from 'mongoose';
+import { MessagesService } from '../messages/messages.service';
+import { PaginationDto } from '../shared/general.interface';
 
 @Injectable()
 export class ConversationsService extends BaseService<Conversation> {
@@ -23,6 +23,8 @@ export class ConversationsService extends BaseService<Conversation> {
     conversationModel: ReturnModelType<typeof Conversation>,
     @Inject(UsersService)
     private usersService: UsersService,
+    @Inject(MessagesService)
+    private messagesService: MessagesService,
   ) {
     super(conversationModel);
   }
@@ -50,7 +52,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     try {
       users = await Promise.all(
-        members.map(item => this.usersService.getById(item)),
+        members.map(item => this.usersService.findById(item)),
       );
     } catch (error) {
       this.logger.log(
@@ -79,10 +81,38 @@ export class ConversationsService extends BaseService<Conversation> {
     return { _id: doc._id, createdAt: doc.createdAt };
   }
 
+  async getConversation(userId: string, conversationId: string) {
+    return await this.findOne({
+      _id: this.toObjectId(conversationId),
+      members: this.toObjectId(userId),
+    });
+  }
+
   async getUserConversations(userId: string) {
-    return await this.usersService.getById(userId, {
+    return await this.usersService.findById(userId, {
       conversations: 1,
       newMessageConversations: 1,
+    });
+  }
+
+  async getConversationMessages(
+    userId: string,
+    conversationId: string,
+    pagination: PaginationDto,
+  ) {
+    const conversation = await this.getConversation(userId, conversationId);
+    return (
+      await this.messagesService.findWithPagination(
+        { conversation: conversation._id },
+        pagination,
+        { content: 1, image: 1, createdAt: 1, updatedAt: 1 },
+        { sort: { createdAt: -1 } },
+      )
+    ).data.map(item => {
+      if (item.image) {
+        item.image = `${process.env.STATIC_SERVER_HOST}:${process.env.STATIC_SERVER_PORT}${process.env.STATIC_SERVER_IMAGE}/${item.image}`;
+      }
+      return item;
     });
   }
 

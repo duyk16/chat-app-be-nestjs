@@ -11,7 +11,7 @@ import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
 import { MongoError } from 'mongodb';
 
 import { BaseModel } from './base.model';
-import { TPagination } from './general.interface';
+import { PaginationDto } from './general.interface';
 
 type TProjection<T> = { [key in keyof T]?: number };
 
@@ -50,9 +50,9 @@ export class BaseService<T extends BaseModel> {
     throw error;
   }
 
-  public async getAll(filter = {}) {
+  public async find(filter = {}, projection?: TProjection<T>, options?: any) {
     try {
-      return await this.model.find(filter);
+      return await this.model.find(filter, projection, options);
     } catch (error) {
       this.logger.log(
         `Failed to get all ${this.model.name}. Filter: ${JSON.stringify(
@@ -64,17 +64,18 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async getAllWithPagination(
+  public async findWithPagination(
     filter = {},
-    pagination: TPagination = {},
-    projection: TProjection<T>,
+    pagination: PaginationDto = {},
+    projection?: TProjection<T>,
+    options?: any,
   ) {
     try {
       let { page = 0, limit = 10 } = pagination;
       const [count, docs] = await Promise.all([
-        this.model.find(filter).count(),
+        this.model.find(filter).countDocuments(),
         this.model
-          .find(filter, projection)
+          .find(filter, projection, options)
           .skip(page * limit)
           .limit(limit),
       ]);
@@ -88,9 +89,9 @@ export class BaseService<T extends BaseModel> {
     } catch (error) {}
   }
 
-  public async getById(
+  public async findById(
     id: string | Types.ObjectId,
-    projection: TProjection<T> = {},
+    projection?: TProjection<T>,
   ) {
     try {
       const found = await this.model.findById(this.toObjectId(id), projection);
@@ -104,7 +105,7 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async findOne(filter = {}, projection: TProjection<T> = {}) {
+  public async findOne(filter = {}, projection?: TProjection<T>) {
     try {
       const found = await this.model.findOne(filter, projection);
       if (!found) {
