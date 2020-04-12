@@ -39,4 +39,14 @@ export class UsersService extends BaseService<User> {
       },
     );
   }
+
+  async readConversation(userId: string, conversationId: string) {
+    return this.updateById(
+      userId,
+      {
+        $pull: { newMessageConversations: conversationId },
+      },
+      { projection: {} },
+    );
+  }
 }

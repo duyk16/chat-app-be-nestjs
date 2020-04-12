@@ -3,6 +3,7 @@ import {
   NotFoundException,
   Inject,
   ConflictException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ReturnModelType, DocumentType } from '@typegoose/typegoose';
@@ -15,16 +16,22 @@ import { User } from '../users/user.model';
 import { Types } from 'mongoose';
 import { MessagesService } from '../messages/messages.service';
 import { PaginationDto } from '../shared/general.interface';
+import { SocketGateway } from '../socket/socket.gateway';
 
 @Injectable()
 export class ConversationsService extends BaseService<Conversation> {
   constructor(
     @InjectModel(Conversation.name)
     conversationModel: ReturnModelType<typeof Conversation>,
+
     @Inject(UsersService)
     private usersService: UsersService,
+
     @Inject(MessagesService)
     private messagesService: MessagesService,
+
+    @Inject(forwardRef(() => SocketGateway))
+    private socketGateway: SocketGateway,
   ) {
     super(conversationModel);
   }
@@ -68,14 +75,16 @@ export class ConversationsService extends BaseService<Conversation> {
     const doc = await this.create(conversation);
 
     const updatedUsers = await Promise.all(
-      users.map(user =>
-        this.usersService.updateById(user._id, {
+      users.map(user => {
+        this.socketGateway.sendConversation(user._id.toString(), conversation);
+
+        return this.usersService.updateById(user._id, {
           $addToSet: {
             conversations: doc._id,
             newMessageConversations: doc._id,
           },
-        }),
-      ),
+        });
+      }),
     );
 
     return { _id: doc._id, createdAt: doc.createdAt };
@@ -89,10 +98,9 @@ export class ConversationsService extends BaseService<Conversation> {
   }
 
   async getUserConversations(userId: string) {
-    return await this.usersService.findById(userId, {
-      conversations: 1,
-      newMessageConversations: 1,
-    });
+    return await this.model
+      .find({ members: this.toObjectId(userId) })
+      .populate('members', 'displayName email updatedAt');
   }
 
   async getConversationMessages(
@@ -105,7 +113,7 @@ export class ConversationsService extends BaseService<Conversation> {
       await this.messagesService.findWithPagination(
         { conversation: conversation._id },
         pagination,
-        { content: 1, image: 1, createdAt: 1, updatedAt: 1 },
+        { content: 1, image: 1, createdAt: 1, updatedAt: 1, owner: 1 },
         { sort: { createdAt: -1 } },
       )
     ).data.map(item => {

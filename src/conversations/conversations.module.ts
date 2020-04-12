@@ -7,6 +7,7 @@ import { Conversation } from './conversation.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 import { MessagesModule } from '../messages/messages.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MessagesModule } from '../messages/messages.module';
     AuthModule,
     UsersModule,
     MessagesModule,
+    SocketModule,
   ],
   controllers: [ConversationsController],
   providers: [ConversationsService],

@@ -5,7 +5,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Types, QueryFindOneAndUpdateOptions } from 'mongoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
 import { MongoError } from 'mongodb';
@@ -133,9 +133,17 @@ export class BaseService<T extends BaseModel> {
     }
   }
 
-  public async updateById(id: string | Types.ObjectId, update: any) {
+  public async updateById(
+    id: string | Types.ObjectId,
+    update: any,
+    options?: QueryFindOneAndUpdateOptions,
+  ) {
     try {
-      return await this.model.findByIdAndUpdate(this.toObjectId(id), update);
+      return await this.model.findByIdAndUpdate(
+        this.toObjectId(id),
+        update,
+        options,
+      );
     } catch (error) {
       this.logger.log(
         `Failed to update ${id}. Data: ${JSON.stringify(update)}`,

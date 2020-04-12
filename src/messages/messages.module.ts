@@ -7,6 +7,7 @@ import { Message } from './message.model';
 import { AuthModule } from '../auth/auth.module';
 import { ConversationsModule } from '../conversations/conversations.module';
 import { UsersModule } from '../users/users.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from '../users/users.module';
     AuthModule,
     forwardRef(() => ConversationsModule),
     forwardRef(() => UsersModule),
+    SocketModule,
   ],
   controllers: [MessagesController],
   providers: [MessagesService],

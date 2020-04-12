@@ -9,6 +9,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/messages.module';
+// import { EventsGateway } from './socket/events.gateway';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { MessagesModule } from './messages/messages.module';
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/static',
     }),
+    SocketModule,
     UsersModule,
     AuthModule,
     ConversationsModule,
