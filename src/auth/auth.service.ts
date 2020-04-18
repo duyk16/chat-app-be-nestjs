@@ -63,6 +63,9 @@ export class AuthService {
     await this.usersService.updateById(user._id, { refreshToken });
 
     return {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
       accessToken,
       refreshToken,
     };
@@ -76,6 +79,8 @@ export class AuthService {
 
       const user = await this.usersService.findById(payload._id, {
         refreshToken: 1,
+        displayName: 1,
+        email: 1,
       });
 
       if (!user) {
@@ -88,7 +93,12 @@ export class AuthService {
         { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || '1d' },
       );
 
-      return { accessToken };
+      return {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        accessToken,
+      };
     } catch (error) {
       this.logger.log(
         `Failed to validate refresh token. Data: ${JSON.stringify(

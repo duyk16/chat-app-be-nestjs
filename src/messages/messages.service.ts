@@ -57,17 +57,20 @@ export class MessagesService extends BaseService<Message> {
     this.logger.log(`User ID: ${userId} create message success`);
 
     await Promise.all([
-      conversation.members.map(
-        (userId: Types.ObjectId) =>
-          this.usersService.updateById(userId, {
-            $addToSet: { newMessageConversations: conversation._id },
-          }),
-
+      conversation.members.map((userId: Types.ObjectId) => {
         this.eventsGateway.sendMessage(userId.toString(), {
           ...message,
-          image: `${process.env.STATIC_SERVER_HOST}:${process.env.STATIC_SERVER_PORT}${process.env.STATIC_SERVER_IMAGE}/${message.image}`,
-        }),
-      ),
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+          image: image
+            ? `${process.env.STATIC_SERVER_HOST}:${process.env.STATIC_SERVER_PORT}${process.env.STATIC_SERVER_IMAGE}/${message.image}`
+            : undefined,
+        });
+
+        return this.usersService.updateById(userId, {
+          $addToSet: { newMessageConversations: conversation._id },
+        });
+      }),
     ]);
 
     return { _id: result._id };
