@@ -49,7 +49,7 @@ export class ConversationsService extends BaseService<Conversation> {
     );
 
     const found = await this.model.findOne({
-      members: { $in: members },
+      $or: [{ members: members }, { members: members.reverse() }],
     });
 
     if (found) {
