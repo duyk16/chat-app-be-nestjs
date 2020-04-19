@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
@@ -61,6 +61,7 @@ export class MessagesService extends BaseService<Message> {
       conversation.members.map((userId: Types.ObjectId) => {
         this.eventsGateway.sendMessage(userId.toString(), {
           ...message,
+          _id: (result._id as Types.ObjectId).toHexString(),
           createdAt: result.createdAt,
           updatedAt: result.updatedAt,
           image: image

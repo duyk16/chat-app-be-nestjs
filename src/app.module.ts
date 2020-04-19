@@ -20,6 +20,8 @@ import { SocketModule } from './socket/socket.module';
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 5000,
     }),
     MulterModule.register({
       dest: './uploads',

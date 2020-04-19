@@ -28,7 +28,7 @@ import { Message } from '../messages/message.model';
 import { UsersService } from '../users/users.service';
 import { Conversation } from '../conversations/conversation.model';
 
-@WebSocketGateway(parseInt(process.env.SOCKET_PORT) || 3001)
+@WebSocketGateway(8002)
 export class SocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   @WebSocketServer()
@@ -143,7 +143,7 @@ export class SocketGateway
     return 'ok';
   }
 
-  async sendMessage(userId: string, message: Message) {
+  async sendMessage(userId: string, message: Message & { _id: string }) {
     this.server.to(SocketGateway.users[userId]).emit('MESSAGE', message);
   }
 
