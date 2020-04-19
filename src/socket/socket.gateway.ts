@@ -7,6 +7,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WsException,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import {
   Logger,
@@ -27,8 +28,9 @@ import { Message } from '../messages/message.model';
 import { UsersService } from '../users/users.service';
 import { Conversation } from '../conversations/conversation.model';
 
-@WebSocketGateway(3001)
-export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway(parseInt(process.env.SOCKET_PORT) || 3001)
+export class SocketGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   @WebSocketServer()
   private server: Server;
 
@@ -45,6 +47,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
   ) {}
+
+  afterInit() {
+    this.logger.log(
+      `Socket gateway successfully start on port ${process.env.SOCKET_PORT}`,
+    );
+  }
 
   handleConnection(socket: Socket) {
     this.logger.log(`Connected ${socket.id}`);
