@@ -6,6 +6,7 @@ import * as Bcrypt from 'bcrypt';
 import { BaseService } from '../shared/base.service';
 import { User } from './user.model';
 import { CreateUserDto } from './user.dto';
+import { PaginationDto } from '../shared/general.interface';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -27,17 +28,25 @@ export class UsersService extends BaseService<User> {
     return { _id: createdUser._id, createdAt: createdUser.createdAt };
   }
 
-  async getUserInfo(email: string) {
-    return this.findOne(
-      { email },
+  async getUsers(userId: string, paginationDto: PaginationDto) {
+    return this.findWithPagination(
+      { _id: { $nin: [this.toObjectId(userId)] } },
+      paginationDto,
       {
-        conversations: 1,
-        newMessageConversations: 1,
         email: 1,
         displayName: 1,
-        updatedAt: 1,
       },
     );
+  }
+
+  async getUserInfo(id: string) {
+    return this.findById(id, {
+      conversations: 1,
+      newMessageConversations: 1,
+      email: 1,
+      displayName: 1,
+      updatedAt: 1,
+    });
   }
 
   async readConversation(userId: string, conversationId: string) {

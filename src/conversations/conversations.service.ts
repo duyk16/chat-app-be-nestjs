@@ -53,9 +53,10 @@ export class ConversationsService extends BaseService<Conversation> {
     });
 
     if (found) {
-      throw new ConflictException(
-        `Conversation of there user was create before`,
-      );
+      throw new ConflictException({
+        conversationId: found._id,
+        message: `Conversation of there user was create before`,
+      });
     }
 
     let users: DocumentType<User>[];
@@ -93,7 +94,7 @@ export class ConversationsService extends BaseService<Conversation> {
     return { _id: doc._id, createdAt: doc.createdAt };
   }
 
-  async getConversation(userId: string, conversationId: string) {
+  async getConversationById(userId: string, conversationId: string) {
     return await this.findOne({
       _id: this.toObjectId(conversationId),
       members: this.toObjectId(userId),
@@ -111,7 +112,7 @@ export class ConversationsService extends BaseService<Conversation> {
     conversationId: string,
     pagination: PaginationDto,
   ) {
-    const conversation = await this.getConversation(userId, conversationId);
+    const conversation = await this.getConversationById(userId, conversationId);
 
     const result = await this.messagesService.findWithPagination(
       { conversation: conversation._id },
