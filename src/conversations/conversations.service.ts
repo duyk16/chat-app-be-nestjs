@@ -40,10 +40,13 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
     createConversationDto: CreateConversationDto,
   ) {
-    const members = [
-      this.toObjectId(userId),
-      ...createConversationDto.members.map(item => this.toObjectId(item)),
-    ];
+    createConversationDto.members = Array.from(
+      new Set([userId, ...createConversationDto.members]),
+    );
+
+    const members = createConversationDto.members.map(item =>
+      this.toObjectId(item),
+    );
 
     const found = await this.model.findOne({
       members: members,
@@ -109,19 +112,22 @@ export class ConversationsService extends BaseService<Conversation> {
     pagination: PaginationDto,
   ) {
     const conversation = await this.getConversation(userId, conversationId);
-    return (
-      await this.messagesService.findWithPagination(
-        { conversation: conversation._id },
-        pagination,
-        { content: 1, image: 1, createdAt: 1, updatedAt: 1, owner: 1 },
-        { sort: { createdAt: -1 } },
-      )
-    ).data.map(item => {
+
+    const result = await this.messagesService.findWithPagination(
+      { conversation: conversation._id },
+      pagination,
+      { content: 1, image: 1, createdAt: 1, updatedAt: 1, owner: 1 },
+      { sort: { createdAt: -1 } },
+    );
+
+    result.data = result.data.map(item => {
       if (item.image) {
         item.image = `${process.env.STATIC_SERVER_HOST}:${process.env.STATIC_SERVER_PORT}${process.env.STATIC_SERVER_IMAGE}/${item.image}`;
       }
       return item;
     });
+
+    return result;
   }
 
   async deleteConversation(id: string, userId: string) {
