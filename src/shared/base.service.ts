@@ -71,20 +71,20 @@ export class BaseService<T extends BaseModel> {
     options?: any,
   ) {
     try {
-      let { page = 0, limit = 10 } = pagination;
+      let { start = 0, end = 20 } = pagination;
       const [count, docs] = await Promise.all([
         this.model.find(filter).countDocuments(),
         this.model
           .find(filter, projection, options)
-          .skip(page * limit)
-          .limit(limit),
+          .skip(start)
+          .limit(end - start),
       ]);
 
       return {
         data: docs,
-        page: page,
-        limit: limit,
-        endPage: Math.floor(count / limit),
+        start: start,
+        end: end,
+        last: count,
       };
     } catch (error) {}
   }

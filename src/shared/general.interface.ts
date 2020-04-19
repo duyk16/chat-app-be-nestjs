@@ -5,22 +5,28 @@ import {
 } from '@nestjs/common';
 
 export class PaginationDto {
-  page?: number;
+  // page?: number;
+  start?: number;
+  end?: number;
 
-  limit?: number;
+  // limit?: number;
 }
 
 export class PaginationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata): PaginationDto {
     let pagination = {
-      page: parseInt(value.page) || 0,
-      limit: parseInt(value.limit) || 10,
+      start: parseInt(value.start) || 0,
+      end: parseInt(value.end) || 20,
     };
 
-    if (pagination.page < 0 || pagination.limit < 0 || pagination.limit > 50) {
+    if (
+      pagination.start < 0 ||
+      pagination.end < 0 ||
+      pagination.end - pagination.start > 50
+    ) {
       throw new BadRequestException(`Pagination query is not valid`);
     }
-    
+
     return pagination;
   }
 }

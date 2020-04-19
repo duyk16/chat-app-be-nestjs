@@ -53,6 +53,7 @@ export class MessagesService extends BaseService<Message> {
     if (image) message.image = image;
 
     let result = await this.create(message);
+    await conversation.updateOne({ updatedAt: new Date() });
 
     this.logger.log(`User ID: ${userId} create message success`);
 
