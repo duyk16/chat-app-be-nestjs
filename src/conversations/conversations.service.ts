@@ -91,19 +91,40 @@ export class ConversationsService extends BaseService<Conversation> {
       }),
     );
 
-    return { _id: doc._id, createdAt: doc.createdAt };
+    return {
+      _id: doc._id,
+      members: users.map(item => ({
+        _id: item._id,
+        email: item.email,
+        displayName: item.displayName,
+        updatedAt: item.updatedAt,
+      })),
+      createdAt: doc.createdAt,
+    };
   }
 
   async getConversationById(userId: string, conversationId: string) {
-    return await this.findOne({
-      _id: this.toObjectId(conversationId),
-      members: this.toObjectId(userId),
-    });
+    const found = await this.model
+      .findOne({
+        _id: this.toObjectId(conversationId),
+        members: this.toObjectId(userId),
+      })
+      .populate('members', 'displayName email updatedAt');
+
+    if (!found) {
+      this.logger.log(
+        `Failed to get by Id. Data: ${JSON.stringify(conversationId)}`,
+      );
+      throw new NotFoundException(`Not found with Id: ${conversationId}`);
+    }
+
+    return found;
   }
 
   async getUserConversations(userId: string) {
     return await this.model
       .find({ members: this.toObjectId(userId) })
+      .sort({ updatedAt: -1 })
       .populate('members', 'displayName email updatedAt');
   }
 

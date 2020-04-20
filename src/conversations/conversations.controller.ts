@@ -34,8 +34,13 @@ export class ConversationsController {
   }
 
   @Get('/')
-  getConversations(@GetUser() user: Payload) {
-    return this.conversationsService.getUserConversations(user._id);
+  async getConversations(@GetUser() user: Payload) {
+    return await this.conversationsService.getUserConversations(user._id);
+  }
+
+  @Get('/:id')
+  async getConversationById(@GetUser() user: Payload, @Param('id') id: string) {
+    return await this.conversationsService.getConversationById(user._id, id);
   }
 
   @Get('/:id/messages')
